@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stoa — Commerce for Humans and Agents</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --stone: #1a1714;
+    --stone-mid: #2c2824;
+    --stone-light: #3d3830;
+    --parchment: #f0ead8;
+    --parchment-dark: #d4c9a8;
+    --gold: #c9a84c;
+    --gold-light: #e8c96e;
+    --text: #e8e0cc;
+    --text-muted: #8a7f6b;
+    --accent: #7eb8a0;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--stone);
+    color: var(--text);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* Grain texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.6;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 4rem;
+    background: linear-gradient(to bottom, rgba(26,23,20,0.95), transparent);
+  }
+
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Column decoration */
+  .hero::before, .hero::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--gold) 20%, var(--gold) 80%, transparent);
+    opacity: 0.15;
+  }
+  .hero::before { left: 15%; }
+  .hero::after { right: 15%; }
+
+  /* Radial glow */
+  .hero-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px; height: 700px;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2rem;
+    opacity: 0.8;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(5rem, 14vw, 11rem);
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    line-height: 0.9;
+    color: var(--parchment);
+    text-transform: uppercase;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-tagline {
+    margin-top: 2.5rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero-tagline strong {
+    color: var(--text);
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  .hero-cta {
+    margin-top: 3.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp 0.8s 0.35s ease both;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 2.2rem;
+    background: var(--gold);
+    color: var(--stone);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-weight: 400;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 2.2rem;
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--gold); background: rgba(201,168,76,0.05); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 0 4rem;
+    margin: 4rem 0;
+    opacity: 0.25;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--gold);
+  }
+  .divider-symbol {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+  }
+
+  /* ── INTRO ── */
+  .intro {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 2rem 6rem;
+    text-align: center;
+  }
+
+  .intro p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.15rem, 2vw, 1.45rem);
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--text-muted);
+  }
+
+  .intro p strong {
+    color: var(--parchment);
+    font-weight: 400;
+  }
+
+  /* ── FEATURES ── */
+  .features {
+    padding: 6rem 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    display: block;
+    opacity: 0.7;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--parchment);
+    margin-bottom: 4rem;
+  }
+
+  .section-title em { font-style: italic; color: var(--gold); }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1px;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.1);
+  }
+
+  .feature-card {
+    background: var(--stone);
+    padding: 2.5rem;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px; height: 0;
+    background: var(--gold);
+    transition: height 0.3s ease;
+  }
+
+  .feature-card:hover { background: var(--stone-mid); }
+  .feature-card:hover::before { height: 100%; }
+
+  .feature-icon {
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem;
+    display: block;
+  }
+
+  .feature-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--parchment);
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.02em;
+  }
+
+  .feature-desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    margin-top: 1.2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(201,168,76,0.08);
+    padding: 0.25rem 0.6rem;
+    border: 1px solid rgba(201,168,76,0.2);
+  }
+
+  /* ── MCP SECTION ── */
+  .mcp-section {
+    padding: 8rem 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+
+  .mcp-code {
+    background: var(--stone-mid);
+    border: 1px solid rgba(201,168,76,0.15);
+    padding: 2rem;
+    position: relative;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.8;
+    color: var(--text-muted);
+    overflow: hidden;
+  }
+
+  .mcp-code::before {
+    content: 'MCP · TOOL CALL';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 0.4rem 1rem;
+    background: rgba(201,168,76,0.08);
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .mcp-code pre {
+    margin-top: 1.5rem;
+    white-space: pre-wrap;
+  }
+
+  .code-key { color: #7eb8a0; }
+  .code-val { color: var(--parchment); }
+  .code-str { color: #c9a84c; }
+  .code-comment { color: #4a453c; }
+
+  .mcp-text .section-title { margin-bottom: 1.5rem; }
+
+  .mcp-text p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+
+  .mcp-text p strong { color: var(--parchment); font-weight: 400; }
+
+  /* ── STACK ── */
+  .stack-section {
+    padding: 6rem 4rem;
+    background: var(--stone-mid);
+    text-align: center;
+  }
+
+  .stack-inner { max-width: 900px; margin: 0 auto; }
+
+  .stack-pills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 3rem;
+  }
+
+  .stack-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.4rem;
+    border: 1px solid rgba(201,168,76,0.2);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+
+  .stack-pill:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(201,168,76,0.05);
+  }
+
+  .stack-pill-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+
+  /* ── CTA BANNER ── */
+  .cta-banner {
+    padding: 10rem 4rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-banner::before {
+    content: 'STOA';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(8rem, 25vw, 22rem);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: rgba(201,168,76,0.03);
+    pointer-events: none;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  .cta-banner h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    font-weight: 300;
+    color: var(--parchment);
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+  }
+
+  .cta-banner p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    margin-bottom: 3rem;
+    font-style: italic;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid rgba(201,168,76,0.1);
+    padding: 2.5rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 1.2rem 1.5rem; }
+    .nav-links { display: none; }
+    .features { padding: 4rem 1.5rem; }
+    .mcp-section { grid-template-columns: 1fr; gap: 3rem; padding: 4rem 1.5rem; }
+    .stack-section, .cta-banner { padding: 5rem 1.5rem; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; padding: 2rem 1.5rem; }
+    .hero::before, .hero::after { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo">Stoa</a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#mcp">MCP</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="https://github.com/stoa-hq/stoa">GitHub</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <p class="hero-label">Open Source Commerce</p>
+  <h1 class="hero-title">Sto<em>a</em></h1>
+  <p class="hero-tagline">Commerce for <strong>humans</strong> and agents.</p>
+  <div class="hero-cta">
+    <a href="#" class="btn-primary">
+      ↓ &nbsp;Get Started
+    </a>
+    <a href="https://github.com/stoa-hq/stoa" class="btn-ghost">
+      ★ &nbsp;Star on GitHub
+    </a>
+  </div>
+</section>
+
+<!-- INTRO -->
+<div class="divider"><span class="divider-symbol">✦</span></div>
+<section class="intro">
+  <p>
+    In ancient Greece, the <strong>Stoa</strong> was the covered walkway where merchants, 
+    philosophers, and citizens gathered to trade and exchange ideas. 
+    Today, Stoa is where <strong>developers, businesses, and AI agents</strong> 
+    come together to build the next generation of commerce.
+  </p>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <span class="section-label">What makes it different</span>
+  <h2 class="section-title">Built for the<br><em>modern web.</em></h2>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">⚡</span>
+      <div class="feature-name">Blazing Fast</div>
+      <p class="feature-desc">Built on Go, Stoa handles thousands of requests per second with minimal memory footprint. No bloat, no unnecessary overhead — just raw performance where it counts.</p>
+      <span class="feature-tag">Golang</span>
+    </div>
+
+    <div class="feature-card">
+      <span class="feature-icon">🔌</span>
+      <div class="feature-name">API First</div>
+      <p class="feature-desc">A clean, well-documented REST API at the core. Build any frontend, integrate any service, automate any workflow. Stoa stays out of your way and lets you build your way.</p>
+      <span class="feature-tag">REST · OpenAPI</span>
+    </div>
+
+    <div class="feature-card">
+      <span class="feature-icon">🛍️</span>
+      <div class="feature-name">Ready to Use</div>
+      <p class="feature-desc">Ships with a beautiful Svelte demo storefront and a full-featured admin panel. Go from zero to live shop in minutes, not days. Single binary. Single command.</p>
+      <span class="feature-tag">Svelte · Admin UI</span>
+    </div>
+
+    <div class="feature-card">
+      <span class="feature-icon">🧩</span>
+      <div class="feature-name">Fully Extensible</div>
+      <p class="feature-desc">A powerful plugin system lets you extend every corner of Stoa. Payment providers, shipping integrations, custom logic — build it once, ship it anywhere.</p>
+      <span class="feature-tag">Plugin API</span>
+    </div>
+
+    <div class="feature-card">
+      <span class="feature-icon">🪶</span>
+      <div class="feature-name">Lightweight by Design</div>
+      <p class="feature-desc">Self-hosted in minutes on a cheap VPS or a Raspberry Pi. No cloud lock-in, no vendor dependency. Your shop, your data, your infrastructure.</p>
+      <span class="feature-tag">Self-Hosted</span>
+    </div>
+
+    <div class="feature-card">
+      <span class="feature-icon">🤝</span>
+      <div class="feature-name">Open Source Forever</div>
+      <p class="feature-desc">Stoa is and will always be open source. No paywalled features, no enterprise tiers for the basics. Built by the community, for the community.</p>
+      <span class="feature-tag">MIT License</span>
+    </div>
+  </div>
+</section>
+
+<!-- MCP SECTION -->
+<section class="mcp-section" id="mcp">
+  <div class="mcp-code">
+    <pre>
+<span class="code-comment">// An AI agent browses your shop</span>
+
+<span class="code-key">tool</span>: <span class="code-str">"stoa_search_products"</span>
+<span class="code-key">input</span>: {
+  <span class="code-key">query</span>: <span class="code-str">"wireless headphones"</span>,
+  <span class="code-key">max_price</span>: <span class="code-val">150</span>,
+  <span class="code-key">in_stock</span>: <span class="code-val">true</span>
+}
+
+<span class="code-comment">→ returns 3 matching products</span>
+
+<span class="code-key">tool</span>: <span class="code-str">"stoa_add_to_cart"</span>
+<span class="code-key">input</span>: {
+  <span class="code-key">product_id</span>: <span class="code-str">"prod_xk9f2"</span>,
+  <span class="code-key">quantity</span>: <span class="code-val">1</span>
+}
+
+<span class="code-comment">→ item added, checkout ready</span>
+
+<span class="code-key">tool</span>: <span class="code-str">"stoa_checkout"</span>
+<span class="code-key">input</span>: {
+  <span class="code-key">cart_id</span>: <span class="code-str">"cart_abc123"</span>,
+  <span class="code-key">payment</span>: <span class="code-str">"stripe"</span>
+}
+
+<span class="code-comment">✓ Order placed. No human needed.</span>
+    </pre>
+  </div>
+
+  <div class="mcp-text">
+    <span class="section-label">Model Context Protocol</span>
+    <h2 class="section-title">Agents shop<br><em>natively.</em></h2>
+    <p>Stoa ships with a built-in <strong>MCP server</strong> — the emerging standard for letting AI agents interact with real-world systems.</p>
+    <p>Your storefront becomes a first-class tool for AI assistants. Agents can <strong>browse products, manage carts, and complete orders</strong> without a single line of custom integration code.</p>
+    <p>The future of commerce isn't just human-friendly. With Stoa, it's <strong>agent-ready from day one.</strong></p>
+  </div>
+</section>
+
+<!-- STACK -->
+<section class="stack-section" id="stack">
+  <div class="stack-inner">
+    <span class="section-label">Technology</span>
+    <h2 class="section-title" style="font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:300;color:var(--parchment);">
+      A carefully chosen <em style="font-style:italic;color:var(--gold);">stack.</em>
+    </h2>
+    <div class="stack-pills">
+      <div class="stack-pill"><div class="stack-pill-dot"></div>Go · Core Engine</div>
+      <div class="stack-pill"><div class="stack-pill-dot"></div>Svelte · Demo Storefront</div>
+      <div class="stack-pill"><div class="stack-pill-dot"></div>REST API · OpenAPI Spec</div>
+      <div class="stack-pill"><div class="stack-pill-dot"></div>MCP · Agent Interface</div>
+      <div class="stack-pill"><div class="stack-pill-dot"></div>Plugin System · Extensible</div>
+      <div class="stack-pill"><div class="stack-pill-dot"></div>Admin Panel · Included</div>
+      <div class="stack-pill"><div class="stack-pill-dot"></div>Single Binary · Easy Deploy</div>
+      <div class="stack-pill"><div class="stack-pill-dot"></div>Apache 2.0 · Open Source</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-banner">
+  <h2>Ready to build<br>your commerce?</h2>
+  <p>Simple to set up. Powerful to extend. Open forever.</p>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+    <a href="#" class="btn-primary">Read the Docs</a>
+    <a href="https://github.com/stoa-hq/stoa" class="btn-ghost">View on GitHub</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">Stoa</span>
+  <span>Commerce for humans and agents.</span>
+  <span>Open Source · Apache 2.0 License</span>
+</footer>
+
+</body>
+</html>
